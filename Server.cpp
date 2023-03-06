@@ -37,7 +37,7 @@ void Server::eventListen(){
     
     addfd2epoll(s_epollfd,s_listenfd,true);
 
-    http_conn::h_epollfd=s_epollfd;
+    http_conn::m_epollfd=s_epollfd;
     // ret= socketpair(PF_LOCAL,SOCK_STREAM,0, s_pipefd);
     // assert(ret!=-1);
     // setnonblocking(s_pipefd[1]);
@@ -64,7 +64,10 @@ void Server::eventLoop(){
                 //todo 处理连接关闭
             }
             else if(events[i].events& EPOLLIN){
+                dealreaddata(socketfd);
                 //todo 处理读事件
+
+
             }
             else if(events[i].events&EPOLLOUT){
                 //todo 处理写事件
@@ -77,8 +80,19 @@ void Server::eventLoop(){
 
 };
 bool Server::dealclientdata(){
+    struct sockaddr_in client_data;
+    socklen_t client_len=sizeof(client_data);
+    int connfd=accept(s_listenfd,(struct sockaddr*)&client_data,&client_len);
+    if(connfd<0)
+        return false;
+    if(http_conn::m_user_count>MAX_FD)
+        return false;
+    timer(connfd, client_data);
 
-}
+
+
+
+};
 int Server::setnonblocking(int fd){
     int old_option = fcntl(fd, F_GETFL);
     int new_option = old_option | O_NONBLOCK;
@@ -96,5 +110,28 @@ void Server::addfd2epoll(int epollfd,int fd,bool if_oneshot){
     setnonblocking(fd);
 
 };
+void Server::dealwritedata(int fd){
 
+    return;
+};
+void Server::dealreaddata(int fd){
+    
+    return;
+};
+void Server::timer(int connfd, struct sockaddr_in client_address)
+{
+    users[connfd].init(connfd, client_address);
+
+    //初始化client_data数据
+    //创建定时器，设置回调函数和超时时间，绑定用户数据，将定时器添加到链表中
+    // users_timer[connfd].address = client_address;
+    // users_timer[connfd].sockfd = connfd;
+    // util_timer *timer = new util_timer;
+    // timer->user_data = &users_timer[connfd];
+    // timer->cb_func = cb_func;
+    // time_t cur = time(NULL);
+    // timer->expire = cur + 3 * TIMESLOT;
+    // users_timer[connfd].timer = timer;
+    // utils.m_timer_lst.add_timer(timer);
+}
 

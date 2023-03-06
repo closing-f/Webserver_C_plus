@@ -24,6 +24,9 @@ public:
     void eventLoop();
     void addfd2epoll(int epollfd,int fd,bool if_oneshot);
     bool dealclientdata();
+    void dealreaddata(int fd);
+    void dealwritedata(int fd);
+    void timer(int connfd, struct sockaddr_in client_address);
 public:
     int server_port;
     int server_listenMode;
@@ -34,4 +37,5 @@ public:
     int s_epollfd;
     int s_pipefd[2];
     epoll_event events[MAX_EVENT_NUMBER];
+    http_conn *users;
 };
